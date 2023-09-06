@@ -1,0 +1,45 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+
+  logging:
+    loglevel: debug
+
+  jaeger:
+    endpoint: jaeger-all-in-one:14250
+    tls:
+      insecure: true
+
+connectors:
+  spanmetrics:
+    namespace: span.metrics
+    dimensions:
+      - name: http.method
+      - name: http.status_code
+      - name: http.target
+      - name: http.route
+      - name: net.peer.name
+
+    exclude_dimensions:
+      - 'status.code'
+      - 'span.kind'
+      - 'span.name'
+
+processors:
+  batch:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [spanmetrics, logging, zipkin, jaeger]
+    metrics:
+      receivers: [spanmetrics, otlp]
+      processors: [batch]
+      exporters: [logging, prometheus]
