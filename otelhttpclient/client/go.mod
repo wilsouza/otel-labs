@@ -1,6 +1,6 @@
-module github.com/wilsouza/otel-examples/otelhttpclient/client
+module github.com/wilsouza/otel-labs/otelhttpclient/client
 
-go 1.20
+go 1.21
 
 require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.42.0

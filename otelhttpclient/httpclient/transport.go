@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 
-	"github.com/wilsouza/otel-examples/otelhttpclient/httpclient/semconv"
+	"github.com/wilsouza/otel-labs/otelhttpclient/httpclient/semconv"
 )
 
 // Transport implements the http.RoundTripper interface and wraps
@@ -21,7 +21,7 @@ type Transport struct {
 
 var _ http.RoundTripper = &Transport{}
 
-const instrumentationName string = "github.com/wilsouza/otel-examples/otelhttpclient/httpclient"
+const instrumentationName string = "github.com/wilsouza/otel-labs/otelhttpclient/httpclient"
 
 // NewTransport wraps the provided http.RoundTripper with one that and includes
 // http metrics context into the outbound request headers.

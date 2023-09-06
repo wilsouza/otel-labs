@@ -1,4 +1,4 @@
-module github.com/wilsouza/otel-examples/spanmetrics/server
+module github.com/wilsouza/otel-labs/spanmetrics/server
 
 go 1.21
 

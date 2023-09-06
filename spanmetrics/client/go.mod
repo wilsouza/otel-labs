@@ -1,4 +1,4 @@
-module github.com/wilsouza/otel-examples/spanmetrics/client
+module github.com/wilsouza/otel-labs/spanmetrics/client
 
 go 1.21
 

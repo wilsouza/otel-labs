@@ -1,4 +1,4 @@
-module github.com/wilsouza/otel-examples/otelhttpclient/httpclient
+module github.com/wilsouza/otel-labs/otelhttpclient/httpclient
 
 go 1.21.0
 

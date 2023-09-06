@@ -14,19 +14,15 @@ import (
 	"os"
 	"time"
 
-	"github.com/wilsouza/otel-examples/otelhttpclient/httpclient"
+	"github.com/wilsouza/otel-labs/otelhttpclient/httpclient"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
 	"go.opentelemetry.io/otel/propagation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 )
-
-var _ = os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
-var _ = os.Setenv("DEMO_SERVER_ENDPOINT", "http://localhost:7080/hello")
 
 // Initializes an OTLP exporter, and configures the corresponding trace and
 // metric providers.
@@ -68,32 +64,12 @@ func initProvider() func() {
 	)
 	otel.SetMeterProvider(meterProvider)
 
-	// traceClient := otlptracegrpc.NewClient(
-	// 	otlptracegrpc.WithInsecure(),
-	// 	otlptracegrpc.WithEndpoint(otelAgentAddr),
-	// 	otlptracegrpc.WithDialOption(grpc.WithBlock()))
-	// sctx, cancel := context.WithTimeout(ctx, time.Second)
-	// defer cancel()
-	// traceExp, err := otlptrace.New(sctx, traceClient)
-	// handleErr(err, "Failed to create the collector trace exporter")
-
-	// bsp := sdktrace.NewBatchSpanProcessor(traceExp)
-	// tracerProvider := sdktrace.NewTracerProvider(
-	// 	sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	// 	sdktrace.WithResource(res),
-	// 	sdktrace.WithSpanProcessor(bsp),
-	// )
-
 	// set global propagator to tracecontext (the default is no-op).
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-	// otel.SetTracerProvider(tracerProvider)
 
 	return func() {
 		cxt, cancel := context.WithTimeout(ctx, time.Second)
 		defer cancel()
-		// if err := traceExp.Shutdown(cxt); err != nil {
-		// 	otel.Handle(err)
-		// }
 		// pushes any last exports to the receiver
 		if err := meterProvider.Shutdown(cxt); err != nil {
 			otel.Handle(err)
@@ -111,62 +87,17 @@ func main() {
 	shutdown := initProvider()
 	defer shutdown()
 
-	// tracer := otel.Tracer("demo-client-tracer")
-	// meter := otel.Meter("demo-client-meter")
-
-	method, _ := baggage.NewMember("method", "repl")
-	client, _ := baggage.NewMember("client", "cli")
-	bag, _ := baggage.New(method, client)
-
-	// labels represent additional key-value descriptors that can be bound to a
-	// metric observer or recorder.
-	// TODO: Use baggage when supported to extract labels from baggage.
-	// commonLabels := []attribute.KeyValue{
-	// 	attribute.String("method", "repl"),
-	// 	attribute.String("client", "cli"),
-	// }
-
-	// Recorder metric example
-	// requestLatency, _ := meter.Float64Histogram(
-	// 	"demo_client/request_latency",
-	// 	metric.WithDescription("The latency of requests processed"),
-	// )
-
-	// TODO: Use a view to just count number of measurements for requestLatency when available.
-	// requestCount, _ := meter.Int64Counter(
-	// 	"demo_client/request_counts",
-	// 	metric.WithDescription("The number of requests processed"),
-	// )
-
-	// lineLengths, _ := meter.Int64Histogram(
-	// 	"demo_client/line_lengths",
-	// 	metric.WithDescription("The lengths of the various lines in"),
-	// )
-
-	// TODO: Use a view to just count number of measurements for lineLengths when available.
-	// lineCounts, _ := meter.Int64Counter(
-	// 	"demo_client/line_counts",
-	// 	metric.WithDescription("The counts of the lines in"),
-	// )
-
-	defaultCtx := baggage.ContextWithBaggage(context.Background(), bag)
+	defaultCtx := context.Background()
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for {
 		startTime := time.Now()
-		// ctx, span := tracer.Start(defaultCtx, "ExecuteRequest")
 		makeRequest(defaultCtx)
-		// span.End()
 		latencyMs := float64(time.Since(startTime)) / 1e6
 		nr := int(rng.Int31n(7))
 		for i := 0; i < nr; i++ {
 			randLineLength := rng.Int63n(999)
-			// lineCounts.Add(ctx, 1, metric.WithAttributes(commonLabels...))
-			// lineLengths.Record(ctx, randLineLength, metric.WithAttributes(commonLabels...))
 			fmt.Printf("#%d: LineLength: %dBy\n", i, randLineLength)
 		}
-
-		// requestLatency.Record(ctx, latencyMs, metric.WithAttributes(commonLabels...))
-		// requestCount.Add(ctx, 1, metric.WithAttributes(commonLabels...))
 
 		fmt.Printf("Latency: %.3fms\n", latencyMs)
 		time.Sleep(time.Duration(1) * time.Second)
