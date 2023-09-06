@@ -5,7 +5,7 @@ receivers:
 
 exporters:
   prometheus:
-    endpoint: "0.0.0.0:8889"
+    endpoint: "prometheus:8889"
 
   logging:
 
@@ -17,15 +17,7 @@ exporters:
 processors:
   batch:
 
-extensions:
-  health_check:
-  pprof:
-    endpoint: :1888
-  zpages:
-    endpoint: :55679
-
 service:
-  extensions: [pprof, zpages, health_check]
   pipelines:
     traces:
       receivers: [otlp]
