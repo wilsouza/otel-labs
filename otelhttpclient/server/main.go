@@ -105,6 +105,15 @@ func handleErr(err error, message string) {
 	}
 }
 
+type httpRandomResponseFunc func(w http.ResponseWriter)
+
+var responses = [3]httpRandomResponseFunc{
+	func(w http.ResponseWriter) {},
+	func(w http.ResponseWriter) { http.Error(w, "Bad Request.", http.StatusBadRequest) },
+	func(w http.ResponseWriter) { http.Error(w, "Internal Error.", http.StatusInternalServerError) },
+}
+var rng = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 func main() {
 	shutdown := initProvider()
 	defer shutdown()
@@ -147,11 +156,13 @@ func main() {
 		}
 		span.SetAttributes(baggageAttributes...)
 
+		n := rng.Int31n(3)
+		responses[n](w)
+
 		if _, err := w.Write([]byte("Hello World")); err != nil {
 			http.Error(w, "write operation failed.", http.StatusInternalServerError)
 			return
 		}
-
 	})
 
 	mux := http.NewServeMux()

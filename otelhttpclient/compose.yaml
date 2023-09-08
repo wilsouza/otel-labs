@@ -26,6 +26,7 @@ services:
       - "55679:55679" # zpages extension
     depends_on:
       - jaeger-all-in-one
+      - prometheus
 
   demo-client:
     build:
@@ -65,6 +66,7 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+
   prometheus:
     container_name: prometheus
     image: prom/prometheus:latest
