@@ -7,9 +7,8 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"io"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"time"
@@ -88,18 +87,9 @@ func main() {
 	defer shutdown()
 
 	defaultCtx := context.Background()
-	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	for {
-		startTime := time.Now()
-		makeRequest(defaultCtx)
-		latencyMs := float64(time.Since(startTime)) / 1e6
-		nr := int(rng.Int31n(7))
-		for i := 0; i < nr; i++ {
-			randLineLength := rng.Int63n(999)
-			fmt.Printf("#%d: LineLength: %dBy\n", i, randLineLength)
-		}
 
-		fmt.Printf("Latency: %.3fms\n", latencyMs)
+	for {
+		makeRequest(defaultCtx)
 		time.Sleep(time.Duration(1) * time.Second)
 	}
 }
@@ -129,5 +119,7 @@ func makeRequest(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
+
+	io.Copy(io.Discard, res.Body)
 	res.Body.Close()
 }

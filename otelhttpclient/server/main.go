@@ -29,9 +29,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-var _ = os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "otel-collector:4317")
-var rng = rand.New(rand.NewSource(time.Now().UnixNano()))
-
 // Initializes an OTLP exporter, and configures the corresponding trace and
 // metric providers.
 func initProvider() func() {
