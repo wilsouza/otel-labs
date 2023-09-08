@@ -3,6 +3,7 @@
 package semconv
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"strconv"
@@ -41,7 +42,8 @@ var hc = &httpConv{
 func ClientResponse(res *http.Response) []attribute.KeyValue {
 	attrs := make([]attribute.KeyValue, 0, 1)
 	if res.StatusCode > 0 {
-		attrs = append(attrs, hc.httpRequestMethodKey.Int(res.StatusCode))
+		fmt.Printf("http.response.status %v\n", hc.httpResponseStatusCodeKey.Int(res.StatusCode))
+		attrs = append(attrs, hc.httpResponseStatusCodeKey.Int(res.StatusCode))
 	}
 
 	return attrs
@@ -51,6 +53,7 @@ func ClientResponse(res *http.Response) []attribute.KeyValue {
 // It always includes "http.request.method" and optionally the "server.address".
 func ClientRequest(req *http.Request) []attribute.KeyValue {
 	attrs := make([]attribute.KeyValue, 0, 2)
+	fmt.Printf("http.method %v\n", hc.httpRequestMethodKey.String(req.Method))
 	attrs = append(attrs, hc.httpRequestMethodKey.String(req.Method))
 
 	peer, _ := splitHostPort(req.Host)
